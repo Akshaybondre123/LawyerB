@@ -1,18 +1,9 @@
 const Document = require('../models/Document');
 const { uploadBase64ToS3, deleteFromS3, getSignedUrl } = require('../utils/s3Upload');
-const { uploadBase64ToLocal, deleteFromLocal, getLocalFileUrl } = require('../utils/localFileStorage');
 const path = require('path');
 
-// Check if using S3 or local storage
-const USE_S3 = process.env.AWS_ACCESS_KEY_ID && 
-               process.env.AWS_ACCESS_KEY_ID !== 'your_aws_access_key' &&
-               process.env.AWS_ACCESS_KEY_ID !== 'placeholder' &&
-               process.env.AWS_SECRET_ACCESS_KEY &&
-               process.env.AWS_SECRET_ACCESS_KEY !== 'your_aws_secret_key' &&
-               process.env.AWS_SECRET_ACCESS_KEY !== 'placeholder' &&
-               process.env.AWS_S3_BUCKET;
-
-console.log(`📁 File storage mode: ${USE_S3 ? 'AWS S3' : 'Local Storage'}`);
+// Always use S3 for production
+console.log('📁 File storage mode: AWS S3');
 
 // Upload file metadata only (no actual file upload)
 exports.uploadMetadata = async (req, res) => {
@@ -125,13 +116,8 @@ exports.uploadDocument = async (req, res) => {
     const base64Content = base64Data.replace(/^data:.*?;base64,/, '');
     const fileSize = Buffer.from(base64Content, 'base64').length;
 
-    // Upload to S3 or local storage
-    let uploadResult;
-    if (USE_S3) {
-      uploadResult = await uploadBase64ToS3(base64Data, fileName, mimeType, userId);
-    } else {
-      uploadResult = await uploadBase64ToLocal(base64Data, fileName, mimeType, userId);
-    }
+    // Upload to S3
+    const uploadResult = await uploadBase64ToS3(base64Data, fileName, mimeType, userId);
 
     // Save to database with original local path preserved
     const document = new Document({
@@ -348,18 +334,14 @@ exports.deleteDocument = async (req, res) => {
       isMetadataOnly: document.is_metadata_only
     });
 
-    // Delete from S3 or local storage only if file was uploaded (has s3_key)
+    // Delete from S3 only if file was uploaded (has s3_key)
     if (document.s3_key && document.s3_key !== null && document.s3_key !== '') {
-      console.log('Deleting file from storage:', document.s3_key);
+      console.log('Deleting file from S3:', document.s3_key);
       try {
-        if (USE_S3) {
-          await deleteFromS3(document.s3_key);
-        } else {
-          await deleteFromLocal(document.s3_key);
-        }
+        await deleteFromS3(document.s3_key);
       } catch (storageError) {
-        console.error('Storage delete error (continuing anyway):', storageError);
-        // Don't fail the whole delete if storage delete fails
+        console.error('S3 delete error (continuing anyway):', storageError);
+        // Don't fail the whole delete if S3 delete fails
       }
     } else {
       console.log('Skipping storage delete - no s3_key (metadata-only file)');
