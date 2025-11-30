@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const { connectDB } = require('./config/database');
 const documentRoutes = require('./routes/documentRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,6 +22,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
+app.use('/api/v1/auth', authRoutes);
 app.use('/api/documents', documentRoutes);
 
 // Health check endpoint
