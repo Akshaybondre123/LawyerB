@@ -51,7 +51,7 @@ async function uploadBase64ToLocal(base64Data, fileName, mimeType, userId) {
     return {
       success: true,
       s3Key: relativePath, // Using relative path as key
-      location: `http://localhost:5000/uploads/${relativePath.replace(/\\/g, '/')}`,
+      location: `https://lawyer-b-b5ud.vercel.app/uploads/${relativePath.replace(/\\/g, '/')}`,
       bucket: 'local-storage',
       etag: uniqueFileName,
     };
@@ -83,7 +83,7 @@ async function deleteFromLocal(fileKey) {
  * @returns {string} - File URL
  */
 function getLocalFileUrl(fileKey) {
-  return `http://localhost:5000/uploads/${fileKey.replace(/\\/g, '/')}`;
+  return `https://lawyer-b-b5ud.vercel.app/uploads/${fileKey.replace(/\\/g, '/')}`;
 }
 
 // Initialize storage on module load
