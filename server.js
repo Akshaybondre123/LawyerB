@@ -50,8 +50,11 @@ app.get('/api/health', (req, res) => {
 app.get('/api/debug', (req, res) => {
   const USE_S3 = process.env.AWS_ACCESS_KEY_ID && 
                  process.env.AWS_ACCESS_KEY_ID !== 'your_aws_access_key' &&
+                 process.env.AWS_ACCESS_KEY_ID !== 'placeholder' &&
                  process.env.AWS_SECRET_ACCESS_KEY &&
-                 process.env.AWS_SECRET_ACCESS_KEY !== 'your_aws_secret_key';
+                 process.env.AWS_SECRET_ACCESS_KEY !== 'your_aws_secret_key' &&
+                 process.env.AWS_SECRET_ACCESS_KEY !== 'placeholder' &&
+                 process.env.AWS_S3_BUCKET;
 
   res.json({
     success: true,
@@ -59,7 +62,8 @@ app.get('/api/debug', (req, res) => {
     hasAWSAccessKey: !!process.env.AWS_ACCESS_KEY_ID,
     hasAWSSecretKey: !!process.env.AWS_SECRET_ACCESS_KEY,
     hasBucket: !!process.env.AWS_S3_BUCKET,
-    bucketName: process.env.AWS_S3_BUCKET || 'Not set'
+    bucketName: process.env.AWS_S3_BUCKET || 'Not set',
+    accessKey: process.env.AWS_ACCESS_KEY_ID || 'Not set'
   });
 });
 
