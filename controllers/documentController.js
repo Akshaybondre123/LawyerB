@@ -3,6 +3,7 @@ const { uploadBase64ToS3, deleteFromS3, getSignedUrl } = require('../utils/s3Upl
 const path = require('path');
 
 // Always use S3 for production
+const USE_S3 = true;
 console.log('📁 File storage mode: AWS S3');
 
 // Upload file metadata only (no actual file upload)
@@ -202,11 +203,7 @@ exports.getUserDocuments = async (req, res) => {
           // For uploaded documents (legacy)
           let downloadUrl = null;
           if (doc.s3_key) {
-            if (USE_S3) {
-              downloadUrl = await getSignedUrl(doc.s3_key);
-            } else {
-              downloadUrl = getLocalFileUrl(doc.s3_key);
-            }
+            downloadUrl = await getSignedUrl(doc.s3_key);
           }
 
           return {
