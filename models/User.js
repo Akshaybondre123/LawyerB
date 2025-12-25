@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema({
     default: 'lawyer',
     enum: ['lawyer', 'client', 'admin'],
   },
+  registeredPcIds: {
+    type: [String],
+    default: [],
+  },
   created_at: {
     type: Date,
     default: Date.now,
